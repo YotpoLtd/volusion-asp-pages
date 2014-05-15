@@ -215,46 +215,36 @@ Class YQuery
 		
 		LocalInstallPath = Null
 
-		LocalYotpoQueryTemplateSQL = "SELECT Customers.EmailAddress AS email," _
-				& " Orders.BillingFirstName + ' ' + Orders.BillingLastName AS customer_name," _
-				& " OrderDetails.OrderID AS order_id," _
-				& " CONVERT (VARCHAR(10), Orders.OrderDate, 121)  AS order_date," _
-				& " CONVERT (VARCHAR(10), Orders.ShipDate, 121)  AS ship_date," _
-				& " '{CurrencyISO}' AS currency_iso," _
-				& " OrderDetails.ProductCode AS domain_key," _
-				& " 'http://' + '{DomainName}' + '/ProductDetails.asp?ProductCode=' + OrderDetails.ProductCode AS url," _
-				& " OrderDetails.ProductName AS name," _
-				& " CAST(OrderDetails.ProductPrice as numeric(10,2)) AS price," _
-				& " Products_Joined.ProductDescriptionShort AS description," _
-				& " 'http://' + '{DomainName}' + '/v/vspfiles/photos/' + replace(Products_Joined.ProductCode,'/','-fslash-') + '-2T.jpg' AS image_url" _
-				& " FROM Orders, Customers, OrderDetails, Products_Joined" _
-				& " WHERE Orders.OrderID = OrderDetails.OrderID AND Customers.CustomerID = Orders.CustomerID AND OrderDetails.DownloadFile IS NULL AND Products_Joined.ProductCode = OrderDetails.ProductCode" _
-				& " AND OrderDetails.ProductCode NOT LIKE 'DSC%'" _	
-				& " AND Orders.OrderStatus = 'Shipped'" _
-				& " AND Orders.ShipDate between '{StartDate}' and '{EndDate}'" _
-				& " ORDER BY Orders.ShipDate desc"		
+		LocalYotpoQueryTemplateSQL = "SELECT Orders.OrderID," _
+				& " Orders.CustomerID," _
+				& " Orders.OrderDate," _
+				& " Orders.ShipDate," _
+				& " Orders.LastModified," _
+				& " Orders.OrderStatus," _
+				& " OrderDetails.ProductCode," _
+				& " OrderDetails.ProductID" _
+				& " FROM Orders" _
+				& " LEFT JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID" _
+				& " WHERE Orders.LastModified between '{StartDate}' and '{EndDate}'" _
+				& " ORDER BY Orders.OrderDate DESC"		
 
 		LocalYotpoQueryTemplateXSD = "<?xml version=""1.0"" encoding=""utf-8"" ?>" _
-				& "<xs:schema id=""YotpoOrders"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"" xmlns:msprop=""urn:schemas-microsoft-com:xml-msprop"">" _
-				& "<xs:element name=""YotpoOrders"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true"">" _
+				& "<xs:schema id=""Order"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"" xmlns:msprop=""urn:schemas-microsoft-com:xml-msprop"">" _
+				& "<xs:element name=""Order"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true"">" _
 				& "<xs:complexType>" _
 				& "<xs:choice minOccurs=""0"" maxOccurs=""unbounded"">" _
-				& "<xs:element name=""YotpoItem"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true"">" _
+				& "<xs:element name=""Table"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true"">" _
 				& "<xs:complexType>" _
 				& "<xs:choice minOccurs=""0"" maxOccurs=""unbounded"">" _
 				& "<xs:sequence>" _
-				& "<xs:element msprop:TableNameXsd=""YotpoItem"" name=""email"" msprop:maxLength=""254"" msprop:SqlDbType=""VarChar"" minOccurs=""0"" />" _
-				& "<xs:element name=""customer_name"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""0"" />" _
-				& "<xs:element name=""order_id"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _				
-				& "<xs:element name=""order_date"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
-				& "<xs:element name=""ship_date"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
-				& "<xs:element name=""currency_iso"" msprop:maxLength=""3"" msprop:SqlDbType=""VarChar"" minOccurs=""1"" />" _
-				& "<xs:element name=""domain_key"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""1"" />" _
-				& "<xs:element name=""url"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" />" _
-				& "<xs:element name=""name"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""0"" />" _
-				& "<xs:element name=""price"" minOccurs=""0"" msprop:SqlDbType=""Money"" />" _
-				& "<xs:element name=""description"" msprop:SqlDbType=""VarChar"" minOccurs=""0"" maxOccurs=""1"" type=""xs:string"" />" _
-				& "<xs:element name=""image_url"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""0"" />" _
+				& "<xs:element name=""OrderID"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _
+				& "<xs:element name=""CustomerID"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _
+				& "<xs:element name=""OrderDate"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
+				& "<xs:element name=""ShipDate"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
+				& "<xs:element name=""LastModified"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
+				& "<xs:element name=""OrderStatus"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""1"" />" _
+				& "<xs:element name=""ProductCode"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""1"" />" _
+				& "<xs:element name=""ProductID"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _
 				& "</xs:sequence></xs:choice></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema>" 			
 	End Sub
 
