@@ -221,7 +221,6 @@ Class YQuery
 				& " o.ShipDate," _
 				& " o.LastModified," _
 				& " o.OrderStatus," _
-				& " od.OrderID," _
 				& " od.ProductCode," _
 				& " od.ProductID" _
 				& " FROM Orders AS o" _
