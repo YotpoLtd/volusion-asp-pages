@@ -215,37 +215,50 @@ Class YQuery
 		
 		LocalInstallPath = Null
 
-		LocalYotpoQueryTemplateSQL = "SELECT Orders.OrderID," _
-				& " Orders.CustomerID," _
-				& " Orders.OrderDate," _
-				& " Orders.ShipDate," _
-				& " Orders.LastModified," _
-				& " Orders.OrderStatus," _
-				& " OrderDetails.ProductCode," _
-				& " OrderDetails.ProductID" _
-				& " FROM Orders" _
-				& " LEFT JOIN OrderDetails ON Orders.OrderID = OrderDetails.OrderID" _
-				& " WHERE Orders.LastModified between '{StartDate}' and '{EndDate}'" _
-				& " ORDER BY Orders.OrderDate DESC"		
+		LocalYotpoQueryTemplateSQL = "SELECT o.OrderID," _
+				& " o.CustomerID," _
+				& " o.OrderDate," _
+				& " o.ShipDate," _
+				& " o.LastModified," _
+				& " o.OrderStatus," _
+				& " od.OrderID," _
+				& " od.ProductCode," _
+				& " od.ProductID" _
+				& " FROM Orders AS o" _
+				& " INNER JOIN OrderDetails AS od ON od.OrderID = o.OrderID" _
+				& " WHERE o.LastModified between '{StartDate}' and '{EndDate}'" _
+				& " ORDER BY o.OrderDate DESC"		
 
 		LocalYotpoQueryTemplateXSD = "<?xml version=""1.0"" encoding=""utf-8"" ?>" _
-				& "<xs:schema id=""Order"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"" xmlns:msprop=""urn:schemas-microsoft-com:xml-msprop"">" _
-				& "<xs:element name=""Order"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true"">" _
+				& "<xs:schema id=""xmldata"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"" xmlns:msprop=""urn:schemas-microsoft-com:xml-msprop"">" _
+				& "<xs:element name=""xmldata"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true"">" _
 				& "<xs:complexType>" _
 				& "<xs:choice minOccurs=""0"" maxOccurs=""unbounded"">" _
-				& "<xs:element name=""Table"" msdata:IsDataSet=""true"" msdata:UseCurrentLocale=""true"">" _
+				& "<xs:element name=""Orders"">" _
 				& "<xs:complexType>" _
-				& "<xs:choice minOccurs=""0"" maxOccurs=""unbounded"">" _
 				& "<xs:sequence>" _
-				& "<xs:element name=""OrderID"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _
-				& "<xs:element name=""CustomerID"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _
-				& "<xs:element name=""OrderDate"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
-				& "<xs:element name=""ShipDate"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
-				& "<xs:element name=""LastModified"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
-				& "<xs:element name=""OrderStatus"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""1"" />" _
-				& "<xs:element name=""ProductCode"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""1"" />" _
-				& "<xs:element name=""ProductID"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _
-				& "</xs:sequence></xs:choice></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema>" 			
+				& "<xs:element minOccurs=""0"" msprop:SqlDbType=""Int"" msprop:IsIdentity=""true"" name=""OrderID"" msprop:SQLTableAlias=""o"" msprop:TableNameXsd=""Orders"" />" _
+				& "<xs:element name=""CustomerID"" msprop:SQLTableAlias=""o"" msprop:SqlDbType=""Int"" minOccurs=""1"" />" _
+				& "<xs:element name=""OrderDate"" msprop:SQLTableAlias=""o"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
+				& "<xs:element name=""ShipDate"" msprop:SQLTableAlias=""o"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
+				& "<xs:element name=""LastModified"" msprop:SQLTableAlias=""o"" msprop:SqlDbType=""SmallDateTime"" minOccurs=""0"" />" _
+				& "<xs:element name=""OrderStatus"" msprop:SQLTableAlias=""o"" msprop:maxLength=""255"" msprop:SqlDbType=""VarChar"" minOccurs=""1"" />" _
+				& "<xs:element name=""OrderDetails"" minOccurs=""0"" maxOccurs=""unbounded"">" _
+					& "<xs:annotation>" _
+						& "<xs:appinfo>" _
+							& "<msdata:Relationship name=""Orders_OrderDetails"" msdata:parent=""Orders"" msdata:child=""OrderDetails"" msdata:parentkey=""OrderID"" msdata:childkey=""OrderID"" />" _
+						& "</xs:appinfo>" _
+					& "</xs:annotation>" _
+					& "<xs:complexType>" _
+						& "<xs:sequence>" _
+							& "<xs:element name=""OrderDetailID"" msprop:TableNameXsd=""OrderDetails"" msprop:SQLFrom=""FROM OrderDetails od INNER JOIN Orders o ON od.OrderID = o.OrderID"" msprop:SqlDbType=""Int"" minOccurs=""0"" msprop:LogTableColumnName=""od.OrderID"" msprop:SQLTableAlias=""od"" msprop:IsIdentity=""true"" />" _
+							& "<xs:element minOccurs=""1"" msprop:SqlDbType=""Int"" name=""OrderID"" msprop:SQLTableAlias=""od"" />" _
+							& "<xs:element minOccurs=""1"" msprop:SqlDbType=""VarChar"" name=""ProductCode"" msprop:SQLTableAlias=""od"" msprop:maxLength=""30"" />" _
+							& "<xs:element minOccurs=""1"" msprop:SqlDbType=""Int"" name=""ProductID"" msprop:SQLTableAlias=""od"" />" _
+						& "</xs:sequence>" _
+					& "</xs:complexType>" _
+				& "</xs:element>" _
+				& "</xs:sequence></xs:complexType></xs:element></xs:choice></xs:complexType></xs:element></xs:schema>" 			
 	End Sub
 
 	Private Sub Class_Terminate()
