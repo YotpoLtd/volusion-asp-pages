@@ -215,18 +215,23 @@ Class YQuery
 		
 		LocalInstallPath = Null
 
-		LocalYotpoQueryTemplateSQL = "SELECT o.OrderID," _
-				& " o.CustomerID," _
-				& " o.OrderDate," _
-				& " o.ShipDate," _
-				& " o.LastModified," _
-				& " o.OrderStatus," _
+		LocalYotpoQueryTemplateSQL = "" _
+				& " SELECT o.*," _
 				& " od.ProductCode," _
 				& " od.ProductID" _
-				& " FROM Orders AS o" _
+				& " FROM (" _
+					& " SELECT OrderID," _
+					& " CustomerID," _
+					& " OrderDate," _
+					& " ShipDate," _
+					& " LastModified," _
+					& " OrderStatus," _				
+					& " ROW_NUMBER() OVER(ORDER BY OrderDate) as Row" _
+					& " FROM Orders" _				
+					& " WHERE LastModified between '{StartDate}' and '{EndDate}'" _
+				& " ) AS o" _
 				& " INNER JOIN OrderDetails AS od ON od.OrderID = o.OrderID" _
-				& " WHERE o.LastModified between '{StartDate}' and '{EndDate}'" _
-				& " ORDER BY o.OrderDate DESC"		
+				& " WHERE Row BETWEEN ({Page} - 1) * {Limit} + 1 AND {Page} * {Limit}"
 
 		LocalYotpoQueryTemplateXSD = "<?xml version=""1.0"" encoding=""utf-8"" ?>" _
 				& "<xs:schema id=""xmldata"" xmlns:xs=""http://www.w3.org/2001/XMLSchema"" xmlns:msdata=""urn:schemas-microsoft-com:xml-msdata"" xmlns:msprop=""urn:schemas-microsoft-com:xml-msprop"">" _
@@ -285,7 +290,7 @@ Class YQuery
 		LocalVolusionAPICallObject.UseSSL = vUseSSL
 	End Property
 	
-	Public Function Retrieve(ByVal iso, ByVal Sdate, ByVal Edate) 'As YotpoQueryItem()
+	Public Function Retrieve(ByVal iso, ByVal Sdate, ByVal Edate, ByVal Page, ByVal Limit) 'As YotpoQueryItem()
 		Dim SQL 'As String
 		Dim XSD 'As String		
 		Dim TempSQLFileName 'As String
@@ -304,6 +309,8 @@ Class YQuery
 		SQL =  replace(SQL, "{CurrencyISO}", iso)		
 		SQL =  replace(SQL, "{StartDate}", Sdate)
 		SQL =  replace(SQL, "{EndDate}", Edate)
+		SQL =  replace(SQL, "{Page}", Page)
+		SQL =  replace(SQL, "{Limit}", Limit)
 
 		'Setup XSD using template
 		XSD = LocalYotpoQueryTemplateXSD	
@@ -339,10 +346,14 @@ Dim EncryptedPassword
 Dim CUR
 Dim StartDate
 Dim EndDate
+Dim Page
+Dim Limit
 
 CUR = Request.QueryString("Currency")
 StartDate = Request.QueryString("StartDate")
 EndDate = Request.QueryString("EndDate")
+Page = Request.QueryString("Page")
+Limit = Request.QueryString("Limit")
 Login = Request.QueryString("Login")
 EncryptedPassword = Request.QueryString("EncryptedPassword")
 
@@ -366,6 +377,14 @@ If  LEN(CUR) <> 3 OR CUR = "" Then
 	CUR = "usd"
 End If
 
+If Page = "" Then
+	Page = 1
+End If
+
+If Limit = "" Then
+	Limit = 1000
+End If
+
 Set YotpoQuery = New YQuery
 YotpoQuery.DestinationPath = Server.MapPath(CONFIGURATION_YOTPO_DESTINATION_PATH)
 YotpoQuery.DomainName = Request.ServerVariables("HTTP_HOST")
@@ -373,7 +392,7 @@ YotpoQuery.UserName = Login
 YotpoQuery.Password = EncryptedPassword
 YotpoQuery.UseSSL = CONFIGURATION_API_USE_SSL
 
-Call YotpoQuery.Retrieve( CUR , StartDate , EndDate )
+Call YotpoQuery.Retrieve( CUR , StartDate , EndDate, Page, Limit )
 
 'Reset some objects
 Set YotpoQuery = Nothing
