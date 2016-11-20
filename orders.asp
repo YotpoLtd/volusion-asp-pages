@@ -229,6 +229,7 @@ Class YQuery
 					& " ROW_NUMBER() OVER(ORDER BY OrderDate) as Row" _
 					& " FROM Orders" _				
 					& " WHERE OrderDate between '{StartDate}' and '{EndDate}'" _
+					& " OR ShipDate between '{StartDate}' and '{EndDate}'" _
 				& " ) AS o" _
 				& " INNER JOIN OrderDetails AS od ON od.OrderID = o.OrderID" _
 				& " WHERE Row BETWEEN ({Page} - 1) * {Limit} + 1 AND {Page} * {Limit}"
